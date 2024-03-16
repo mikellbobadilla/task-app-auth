@@ -21,16 +21,19 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
 
 @Component
-@AllArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
     private static final Logger log = Logger.getLogger(JwtFilter.class.getName());
 
     private final JwtService jwtService;
     private final UserDetailsService detailsService;
+
+    public JwtFilter(JwtService jwtService, UserDetailsService detailsService) {
+        this.jwtService = jwtService;
+        this.detailsService = detailsService;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
