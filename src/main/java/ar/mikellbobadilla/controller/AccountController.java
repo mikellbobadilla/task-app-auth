@@ -44,8 +44,8 @@ public class AccountController {
     }
 
     @DeleteMapping("/{id}")
-    ResponseEntity<Void> deleteAccount(@PathVariable Long id) throws AccountNotFoundException, AccountException {
-        service.deleteAccount(id);
+    ResponseEntity<Void> deleteAccount(@PathVariable Long id, @RequestBody String password) throws AccountNotFoundException, AccountException {
+        service.deleteAccount(id, password);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
