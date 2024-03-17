@@ -9,6 +9,8 @@ import ar.mikellbobadilla.exception.AccountNotFoundException;
 
 public interface AccountService {
 
+    public AccountResponse getAccount(Long id) throws AccountNotFoundException;
+
     public AccountResponse create(AccountRequest request) throws AccountException;
 
     public AccountResponse updateUsernameAccount(Long id, ChangeUsernameRequest request) throws AccountException, AccountNotFoundException;
