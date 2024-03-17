@@ -11,11 +11,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import ar.mikellbobadilla.advice.ErrorResponse;
 import ar.mikellbobadilla.service.interfaces.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -53,8 +55,9 @@ public class JwtFilter extends OncePerRequestFilter {
             username = jwtService.getSubject(token);
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails details = null;
 
-                UserDetails details = detailsService.loadUserByUsername(username);
+                details = detailsService.loadUserByUsername(username);
 
                 if (jwtService.isTokenValid(token, details)) {
                     var authToken = new UsernamePasswordAuthenticationToken(details, null, details.getAuthorities());
@@ -63,14 +66,26 @@ public class JwtFilter extends OncePerRequestFilter {
             }
 
             filterChain.doFilter(request, response);
-
-        }catch(RuntimeException exc) {
-            exc.printStackTrace();
-            Map<String, Object> res = new HashMap<>();
-            res.put("status", HttpStatus.FORBIDDEN.value());
-            res.put("error", "Session expired!");
+        } catch (UsernameNotFoundException exc) {
+            ErrorResponse res = ErrorResponse.builder()
+                    .status(HttpStatus.UNAUTHORIZED.value())
+                    .error("Invalid token!. If you have updated your account, please log in again")
+                    .build();
             var obj = new ObjectMapper();
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.getWriter().write(obj.writeValueAsString(res));
+            return;
+        } catch (RuntimeException exc) {
+            /* Todo: Change this exception */
+            exc.printStackTrace();
+            ErrorResponse res = ErrorResponse.builder()
+                    .status(HttpStatus.NOT_FOUND.value())
+                    .error("Session expired!")
+                    .build();
+            var obj = new ObjectMapper();
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.getWriter().write(obj.writeValueAsString(res));
+            return;
         }
     }
 
