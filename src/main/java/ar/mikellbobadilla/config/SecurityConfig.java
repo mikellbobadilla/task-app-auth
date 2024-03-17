@@ -30,6 +30,8 @@ public class SecurityConfig {
                     httpRequest.requestMatchers("/api/auth/**", "/h2-console/**").permitAll();
                     httpRequest.requestMatchers(HttpMethod.POST, "/api/accounts").permitAll();
                     httpRequest.requestMatchers(HttpMethod.PATCH, "/api/accounts/*/username").authenticated();
+                    httpRequest.requestMatchers(HttpMethod.PATCH, "/api/accounts/*/password").authenticated();
+                    httpRequest.requestMatchers(HttpMethod.DELETE, "/api/accounts/*").authenticated();
                     httpRequest.requestMatchers("/api/tasks/**").authenticated();
                     httpRequest.anyRequest().denyAll();
                 })
