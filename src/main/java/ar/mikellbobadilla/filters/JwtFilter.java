@@ -45,12 +45,10 @@ public class JwtFilter extends OncePerRequestFilter {
 
         try {
 
-            if (authHeader == null || !authHeader.startsWith("Beader ")) {
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 filterChain.doFilter(request, response);
                 return;
             }
-
-
             token = authHeader.substring(7);
             username = jwtService.getSubject(token);
 
@@ -67,7 +65,7 @@ public class JwtFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
 
         }catch(RuntimeException exc) {
-            log.severe(exc.getMessage());
+            exc.printStackTrace();
             Map<String, Object> res = new HashMap<>();
             res.put("status", HttpStatus.FORBIDDEN.value());
             res.put("error", "Session expired!");
