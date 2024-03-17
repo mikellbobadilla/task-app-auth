@@ -25,6 +25,22 @@ public class AccountServiceImpl implements AccountService {
     private final PasswordEncoder encoder;
 
     @Override
+    public AccountResponse getAccount(Long id) throws AccountNotFoundException {
+        Account accountAuth = getAccountFromContextHolder();
+
+        boolean isSameAccount = accountAuth.getId().equals(id);
+
+        if (!isSameAccount) {
+            throw new AccountNotFoundException("Account not found!");
+        }
+
+        Account account = repository.findById(id)
+                .orElseThrow(() -> new AccountNotFoundException("Account not found!"));
+
+        return parseToAccontResponse(account);
+    }
+
+    @Override
     public AccountResponse create(AccountRequest request) throws AccountException {
 
         if (repository.existsByUsername(request.username())) {
