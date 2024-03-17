@@ -96,6 +96,18 @@ public class AccountService {
         repository.saveAndFlush(account);
     }
 
+    public void deleteAccount(Long id) throws AccountException {
+        Account accountAuth = getAccountFromContextHolder();
+
+        boolean isSameAccount = accountAuth.getId().equals(id);
+
+        if (!isSameAccount) {
+            throw new AccountException("Account not found!");
+        }
+
+        repository.deleteById(id);
+    }
+
     private Account getAccountFromContextHolder() {
         Authentication aut = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         return (Account) aut.getPrincipal();
