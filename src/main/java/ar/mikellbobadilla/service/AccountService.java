@@ -96,13 +96,19 @@ public class AccountService {
         repository.saveAndFlush(account);
     }
 
-    public void deleteAccount(Long id) throws AccountException {
+    public void deleteAccount(Long id, String password) throws AccountException {
         Account accountAuth = getAccountFromContextHolder();
 
         boolean isSameAccount = accountAuth.getId().equals(id);
 
+        boolean passIsCorrect = encoder.matches(password, accountAuth.getPassword());
+
         if (!isSameAccount) {
             throw new AccountException("Account not found!");
+        }
+
+        if (!passIsCorrect) {
+            throw new AccountException("Password incorrect!");
         }
 
         repository.deleteById(id);
