@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ar.mikellbobadilla.dto.AuthRequest;
 import ar.mikellbobadilla.dto.AuthResponse;
 import ar.mikellbobadilla.exception.AccountException;
-import ar.mikellbobadilla.service.AuthService;
+import ar.mikellbobadilla.service.interfaces.AuthService;
 import lombok.AllArgsConstructor;
 
 @RestController
