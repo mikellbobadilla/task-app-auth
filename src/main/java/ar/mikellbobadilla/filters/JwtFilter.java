@@ -12,6 +12,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.auth0.jwt.exceptions.SignatureVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ar.mikellbobadilla.advice.ErrorResponse;
@@ -71,12 +73,20 @@ public class JwtFilter extends OncePerRequestFilter {
             response.setContentType("application/json");
             response.getWriter().write(obj.writeValueAsString(res));
             return;
-        } catch (RuntimeException exc) {
-            /* Todo: Change this exception */
-            exc.printStackTrace();
+        } catch (TokenExpiredException exc) {
             ErrorResponse res = ErrorResponse.builder()
-                    .status(HttpStatus.NOT_FOUND.value())
+                    .status(HttpStatus.UNAUTHORIZED.value())
                     .error("Session expired!")
+                    .build();
+            var obj = new ObjectMapper();
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setContentType("application/json");
+            response.getWriter().write(obj.writeValueAsString(res));
+            return;
+        } catch(SignatureVerificationException exc) {
+            ErrorResponse res = ErrorResponse.builder()
+                    .status(HttpStatus.UNAUTHORIZED.value())
+                    .error("Invalid token!")
                     .build();
             var obj = new ObjectMapper();
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
@@ -85,5 +95,4 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
     }
-
 }
