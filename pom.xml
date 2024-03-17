@@ -11,7 +11,7 @@
 	</parent>
 	<groupId>ar.mikellbobadilla</groupId>
 	<artifactId>task-app-auth</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<name>task-app-auth</name>
 	<description>Demo project for Spring Boot</description>
 	<properties>
