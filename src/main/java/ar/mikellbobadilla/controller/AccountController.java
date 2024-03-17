@@ -1,5 +1,7 @@
 package ar.mikellbobadilla.controller;
 
+import javax.security.auth.login.AccountNotFoundException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -11,8 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ar.mikellbobadilla.dto.AccountRequest;
 import ar.mikellbobadilla.dto.AccountResponse;
-import ar.mikellbobadilla.dto.UpdatePasswordRequest;
-import ar.mikellbobadilla.dto.UpdateUsernameRequest;
+import ar.mikellbobadilla.dto.ChangePasswordRequest;
+import ar.mikellbobadilla.dto.ChangeUsernameRequest;
 import ar.mikellbobadilla.exception.AccountException;
 import ar.mikellbobadilla.service.AccountService;
 import lombok.AllArgsConstructor;
@@ -29,15 +31,14 @@ public class AccountController {
         return new ResponseEntity<>(service.create(request), HttpStatus.CREATED);
     }
 
-    @PatchMapping("/{username}")
-    ResponseEntity<Void> updateUsernameAccount(@PathVariable String username, @RequestBody UpdateUsernameRequest request) {
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    @PatchMapping("/{id}/username")
+    ResponseEntity<AccountResponse> updateUsername(@PathVariable Long id, @RequestBody ChangeUsernameRequest request) throws AccountNotFoundException, AccountException {
+        return new ResponseEntity<>(service.updateUsernameAccount(id, request), HttpStatus.OK);
     }
 
-    @PatchMapping
-    ResponseEntity<Void> updatePasswordAccount(UpdatePasswordRequest request) {
-        
+    @PatchMapping("/{id}/password")
+    ResponseEntity<Void> updatePassword(@PathVariable Long id, @RequestBody ChangePasswordRequest request) throws AccountNotFoundException, AccountException {
+        service.updatePasswordAccount(id, request);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
 }
