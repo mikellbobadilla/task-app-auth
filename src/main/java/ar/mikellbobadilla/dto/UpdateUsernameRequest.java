@@ -1,5 +1,5 @@
 package ar.mikellbobadilla.dto;
 
-public record UpdateUsernameRequest(String username, String newUsername) {
+public record UpdateUsernameRequest(String newUsername) {
     
 }
