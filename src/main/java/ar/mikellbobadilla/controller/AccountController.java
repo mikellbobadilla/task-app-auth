@@ -17,7 +17,7 @@ import ar.mikellbobadilla.dto.AccountResponse;
 import ar.mikellbobadilla.dto.ChangePasswordRequest;
 import ar.mikellbobadilla.dto.ChangeUsernameRequest;
 import ar.mikellbobadilla.exception.AccountException;
-import ar.mikellbobadilla.service.AccountService;
+import ar.mikellbobadilla.service.interfaces.AccountService;
 import lombok.AllArgsConstructor;
 
 @RestController
