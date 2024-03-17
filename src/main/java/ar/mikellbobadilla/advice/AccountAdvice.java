@@ -2,6 +2,7 @@ package ar.mikellbobadilla.advice;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -26,6 +27,16 @@ public class AccountAdvice {
     @ExceptionHandler(AccountNotFoundException.class)
     ResponseEntity<ErrorResponse> handleNotFoundException(AccountNotFoundException exc) {
 
+        ErrorResponse response = ErrorResponse.builder()
+                .status(HttpStatus.NOT_FOUND.value())
+                .error(exc.getMessage())
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    ResponseEntity<ErrorResponse> userNotFoundException(UsernameNotFoundException exc) {
         ErrorResponse response = ErrorResponse.builder()
                 .status(HttpStatus.NOT_FOUND.value())
                 .error(exc.getMessage())
