@@ -4,6 +4,7 @@ import javax.security.auth.login.AccountNotFoundException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,6 +40,12 @@ public class AccountController {
     @PatchMapping("/{id}/password")
     ResponseEntity<Void> updatePassword(@PathVariable Long id, @RequestBody ChangePasswordRequest request) throws AccountNotFoundException, AccountException {
         service.updatePasswordAccount(id, request);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @DeleteMapping("/{id}")
+    ResponseEntity<Void> deleteAccount(@PathVariable Long id) throws AccountNotFoundException, AccountException {
+        service.deleteAccount(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
