@@ -35,6 +35,6 @@ public class Task {
     @Column(nullable = false)
     private Date targetDate;
     @ManyToOne(fetch = FetchType.LAZY, targetEntity = Account.class)
-    @JoinColumn(name = "account_id", nullable = false)
+    @JoinColumn(nullable = false)
     private Account account;
 }
