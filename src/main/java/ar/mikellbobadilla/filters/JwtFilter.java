@@ -27,8 +27,6 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
-    private static final Logger log = Logger.getLogger(JwtFilter.class.getName());
-
     private final JwtService jwtService;
     private final UserDetailsService detailsService;
 
@@ -73,6 +71,7 @@ public class JwtFilter extends OncePerRequestFilter {
                     .build();
             var obj = new ObjectMapper();
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setContentType("application/json");
             response.getWriter().write(obj.writeValueAsString(res));
             return;
         } catch (RuntimeException exc) {
@@ -84,6 +83,7 @@ public class JwtFilter extends OncePerRequestFilter {
                     .build();
             var obj = new ObjectMapper();
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setContentType("application/json");
             response.getWriter().write(obj.writeValueAsString(res));
             return;
         }
