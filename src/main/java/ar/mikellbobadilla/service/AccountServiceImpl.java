@@ -56,7 +56,7 @@ public class AccountServiceImpl implements AccountService {
                 .password(encoder.encode(request.password()))
                 .build();
 
-        return parseToAccontResponse(repository.saveAndFlush(account));
+        return parseToAccontResponse(repository.save(account));
     }
 
     @Override
@@ -85,7 +85,7 @@ public class AccountServiceImpl implements AccountService {
                 .orElseThrow(() -> new AccountNotFoundException("Account not found!"));
 
         account.setUsername(request.username());
-        repository.saveAndFlush(account);
+        repository.save(account);
         return parseToAccontResponse(account);
 
     }
@@ -117,7 +117,7 @@ public class AccountServiceImpl implements AccountService {
                 .orElseThrow(() -> new AccountNotFoundException("Account not found!"));
 
         account.setPassword(encoder.encode(request.newPassword()));
-        repository.saveAndFlush(account);
+        repository.save(account);
     }
 
     @Override
