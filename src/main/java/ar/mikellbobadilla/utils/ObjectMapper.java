@@ -1,5 +1,7 @@
 package ar.mikellbobadilla.utils;
 
+import org.springframework.stereotype.Component;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -9,12 +11,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.springframework.stereotype.Component;
-
 @Component
 public class ObjectMapper {
-    
-     private <T> Constructor<T> getConstructor(Class<T> clazz, Class<?>[] typesArguments) {
+
+    private <T> Constructor<T> getConstructor(Class<T> clazz, Class<?>[] typesArguments) {
         try {
             return clazz.getConstructor(typesArguments);
         } catch (NoSuchMethodException exc) {

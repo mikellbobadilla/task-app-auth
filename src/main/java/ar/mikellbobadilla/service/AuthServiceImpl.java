@@ -1,10 +1,5 @@
 package ar.mikellbobadilla.service;
 
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Service;
-
 import ar.mikellbobadilla.dto.AuthRequest;
 import ar.mikellbobadilla.dto.AuthResponse;
 import ar.mikellbobadilla.exception.AccountException;
@@ -13,6 +8,10 @@ import ar.mikellbobadilla.repository.AccountRepository;
 import ar.mikellbobadilla.service.interfaces.AuthService;
 import ar.mikellbobadilla.service.interfaces.JwtService;
 import lombok.AllArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor

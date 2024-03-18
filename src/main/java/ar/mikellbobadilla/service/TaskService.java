@@ -1,12 +1,5 @@
 package ar.mikellbobadilla.service;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-
 import ar.mikellbobadilla.dto.TaskRequest;
 import ar.mikellbobadilla.dto.TaskResponse;
 import ar.mikellbobadilla.exception.AccountException;
@@ -18,6 +11,12 @@ import ar.mikellbobadilla.repository.AccountRepository;
 import ar.mikellbobadilla.repository.TaskRepository;
 import ar.mikellbobadilla.utils.ObjectMapper;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor

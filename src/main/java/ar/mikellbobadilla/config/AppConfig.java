@@ -1,5 +1,7 @@
 package ar.mikellbobadilla.config;
 
+import ar.mikellbobadilla.repository.AccountRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -10,9 +12,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import ar.mikellbobadilla.repository.AccountRepository;
-import lombok.AllArgsConstructor;
 
 @Configuration
 @AllArgsConstructor

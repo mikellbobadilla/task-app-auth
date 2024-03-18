@@ -1,7 +1,14 @@
 package ar.mikellbobadilla.filters;
 
-import java.io.IOException;
-
+import ar.mikellbobadilla.advice.ErrorResponse;
+import ar.mikellbobadilla.service.interfaces.JwtService;
+import com.auth0.jwt.exceptions.SignatureVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -12,16 +19,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.auth0.jwt.exceptions.SignatureVerificationException;
-import com.auth0.jwt.exceptions.TokenExpiredException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import ar.mikellbobadilla.advice.ErrorResponse;
-import ar.mikellbobadilla.service.interfaces.JwtService;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
@@ -83,7 +81,7 @@ public class JwtFilter extends OncePerRequestFilter {
             response.setContentType("application/json");
             response.getWriter().write(obj.writeValueAsString(res));
             return;
-        } catch(SignatureVerificationException exc) {
+        } catch (SignatureVerificationException exc) {
             ErrorResponse res = ErrorResponse.builder()
                     .status(HttpStatus.UNAUTHORIZED.value())
                     .error("Invalid token!")
