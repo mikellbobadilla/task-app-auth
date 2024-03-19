@@ -21,6 +21,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
     private final AccountRepository accountRepository;
 
+    /* Todo: Handle exceptions [BadCredentialsException, AuthenticationException] */
     @Override
     public AuthResponse authenticate(AuthRequest request) throws AccountException {
         Authentication auth = new UsernamePasswordAuthenticationToken(request.username(), request.password());
