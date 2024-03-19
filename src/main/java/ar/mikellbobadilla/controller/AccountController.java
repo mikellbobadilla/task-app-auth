@@ -22,17 +22,17 @@ public class AccountController {
 
     @PostMapping
     ResponseEntity<AccountResponse> createAccount(@RequestBody AccountRequest request) throws AccountException {
-        return new ResponseEntity<>(service.create(request), HttpStatus.CREATED);
+        return new ResponseEntity<>(service.createAccount(request), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{id}/username")
     ResponseEntity<AccountResponse> updateUsername(@PathVariable Long id, @RequestBody ChangeUsernameRequest request) throws AccountNotFoundException, AccountException {
-        return new ResponseEntity<>(service.updateUsernameAccount(id, request), HttpStatus.OK);
+        return new ResponseEntity<>(service.updateUsername(id, request), HttpStatus.OK);
     }
 
     @PatchMapping("/{id}/password")
     ResponseEntity<Void> updatePassword(@PathVariable Long id, @RequestBody ChangePasswordRequest request) throws AccountNotFoundException, AccountException {
-        service.updatePasswordAccount(id, request);
+        service.updatePassword(id, request);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

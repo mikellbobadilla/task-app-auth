@@ -51,7 +51,7 @@ class AccountServiceImplTest {
         when(repository.save(any(Account.class))).thenReturn(account);
         AccountRequest request = new AccountRequest("username", "password", "password");
 
-        AccountResponse res = service.create(request);
+        AccountResponse res = service.createAccount(request);
         assertNotNull(res);
     }
 
@@ -63,7 +63,7 @@ class AccountServiceImplTest {
 
         assertThrows(
                 AccountException.class,
-                () -> service.create(request));
+                () -> service.createAccount(request));
     }
 
     @Test
@@ -72,7 +72,7 @@ class AccountServiceImplTest {
         AccountRequest request = new AccountRequest("username", "password", "username");
         assertThrows(
                 AccountException.class,
-                () -> service.create(request));
+                () -> service.createAccount(request));
     }
 
     @Test
@@ -117,7 +117,7 @@ class AccountServiceImplTest {
 
         ChangeUsernameRequest request = new ChangeUsernameRequest("newUsername", "password");
 
-        AccountResponse res = service.updateUsernameAccount(1L, request);
+        AccountResponse res = service.updateUsername(1L, request);
 
         assertNotNull(res);
         assertEquals("newUsername", res.username());
@@ -133,7 +133,7 @@ class AccountServiceImplTest {
 
         assertThrows(
                 AccountException.class,
-                () -> service.updateUsernameAccount(1L, request));
+                () -> service.updateUsername(1L, request));
 
     }
 
@@ -145,7 +145,7 @@ class AccountServiceImplTest {
 
         assertThrows(
                 AccountException.class,
-                () -> service.updateUsernameAccount(1L, request));
+                () -> service.updateUsername(1L, request));
 
     }
 
@@ -162,7 +162,7 @@ class AccountServiceImplTest {
 
         assertThrows(
                 AccountNotFoundException.class,
-                () -> service.updateUsernameAccount(1L, request));
+                () -> service.updateUsername(1L, request));
     }
 
     @Test
@@ -174,7 +174,7 @@ class AccountServiceImplTest {
 
         ChangePasswordRequest request = new ChangePasswordRequest("password", "newPass", "newPass");
         assertDoesNotThrow(
-                () -> service.updatePasswordAccount(account.getId(), request));
+                () -> service.updatePassword(account.getId(), request));
 
     }
 
@@ -186,7 +186,7 @@ class AccountServiceImplTest {
 
         assertThrows(
                 AccountException.class,
-                () -> service.updatePasswordAccount(2L, request));
+                () -> service.updatePassword(2L, request));
     }
 
     @Test
@@ -198,7 +198,7 @@ class AccountServiceImplTest {
 
         assertThrows(
                 AccountException.class,
-                () -> service.updatePasswordAccount(account.getId(), request));
+                () -> service.updatePassword(account.getId(), request));
 
     }
 
@@ -212,7 +212,7 @@ class AccountServiceImplTest {
 
         assertThrows(
                 AccountException.class,
-                () -> service.updatePasswordAccount(account.getId(), request));
+                () -> service.updatePassword(account.getId(), request));
 
     }
 
@@ -225,7 +225,7 @@ class AccountServiceImplTest {
 
         ChangePasswordRequest request = new ChangePasswordRequest("password", "newPass", "newPass");
         assertDoesNotThrow(
-                () -> service.updatePasswordAccount(account.getId(), request));
+                () -> service.updatePassword(account.getId(), request));
 
     }
 

@@ -40,7 +40,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public AccountResponse create(AccountRequest request) throws AccountException {
+    public AccountResponse createAccount(AccountRequest request) throws AccountException {
 
         if (repository.existsByUsername(request.username())) {
             throw new AccountException("Account exists!");
@@ -59,7 +59,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public AccountResponse updateUsernameAccount(Long id, ChangeUsernameRequest request)
+    public AccountResponse updateUsername(Long id, ChangeUsernameRequest request)
             throws AccountException, AccountNotFoundException {
 
         Account accountAuth = getAccountFromContextHolder();
@@ -90,7 +90,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void updatePasswordAccount(Long id, ChangePasswordRequest request)
+    public void updatePassword(Long id, ChangePasswordRequest request)
             throws AccountException, AccountNotFoundException {
 
         Account accountAuth = getAccountFromContextHolder();

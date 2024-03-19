@@ -11,11 +11,11 @@ public interface AccountService {
 
     public AccountResponse getAccount(Long id) throws AccountNotFoundException;
 
-    public AccountResponse create(AccountRequest request) throws AccountException;
+    public AccountResponse createAccount(AccountRequest request) throws AccountException;
 
-    public AccountResponse updateUsernameAccount(Long id, ChangeUsernameRequest request) throws AccountException, AccountNotFoundException;
+    public AccountResponse updateUsername(Long id, ChangeUsernameRequest request) throws AccountException, AccountNotFoundException;
 
-    public void updatePasswordAccount(Long id, ChangePasswordRequest request) throws AccountException, AccountNotFoundException;
+    public void updatePassword(Long id, ChangePasswordRequest request) throws AccountException, AccountNotFoundException;
 
     public void deleteAccount(Long id, String password) throws AccountException;
 }
