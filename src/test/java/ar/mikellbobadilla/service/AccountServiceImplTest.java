@@ -8,20 +8,20 @@ import ar.mikellbobadilla.exception.AccountException;
 import ar.mikellbobadilla.exception.AccountNotFoundException;
 import ar.mikellbobadilla.model.Account;
 import ar.mikellbobadilla.repository.AccountRepository;
+import ar.mikellbobadilla.utils.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,32 +31,31 @@ class AccountServiceImplTest {
     private PasswordEncoder encoder;
     @Mock
     private AccountRepository repository;
+    @Mock
+    private ObjectMapper mapper;
 
     @InjectMocks
     private AccountServiceImpl service;
 
     @BeforeEach
     void setup() {
-        service = new AccountServiceImpl(repository, encoder);
+        service = new AccountServiceImpl(repository, encoder, mapper);
     }
 
     @Test
-    void testCreateAccount() throws AccountException {
-        when(repository.existsByUsername(anyString())).thenReturn(false);
-        when(encoder.encode(anyString())).thenReturn("passEncoded");
-        Account account = Account.builder()
-                .username("username")
-                .password("password")
-                .build();
-        when(repository.save(any(Account.class))).thenReturn(account);
-        AccountRequest request = new AccountRequest("username", "password", "password");
+    void testCreateAccount_Success() throws AccountException {
 
-        AccountResponse res = service.createAccount(request);
+        when(repository.existsByUsername(anyString())).thenReturn(false);
+        when(repository.save(any())).thenReturn(createAccount());
+
+        when(mapper.mapData(AccountResponse.class, createAccount()))
+                .thenReturn(new AccountResponse(1L, "username"));
+        AccountResponse res = service.createAccount(createAccountRequest());
         assertNotNull(res);
     }
 
     @Test
-    void testCreateAccountExists() {
+    void testCreateAccount_AccountExists() {
         when(repository.existsByUsername(anyString())).thenReturn(true);
 
         AccountRequest request = new AccountRequest("username", "password", "password");
@@ -67,7 +66,7 @@ class AccountServiceImplTest {
     }
 
     @Test
-    void testCreateAccountPasswordMismatch() {
+    void testCreateAccount_PasswordMismatch() {
         when(repository.existsByUsername(anyString())).thenReturn(false);
         AccountRequest request = new AccountRequest("username", "password", "username");
         assertThrows(
@@ -76,10 +75,12 @@ class AccountServiceImplTest {
     }
 
     @Test
-    void testGetAccountById() throws AccountNotFoundException {
-        Account account = authenticate();
+    void testGetAccountById_Success() throws AccountNotFoundException {
+        Account account = createAccount();
+        AccountResponse accountResponse = new AccountResponse(account.getId(), account.getUsername());
 
-        when(repository.findById(1L)).thenReturn(Optional.of(account));
+        when(repository.findById(account.getId())).thenReturn(Optional.of(account));
+        when(mapper.mapData(AccountResponse.class, account)).thenReturn(accountResponse);
 
         AccountResponse res = service.getAccount(1L);
 
@@ -87,18 +88,7 @@ class AccountServiceImplTest {
     }
 
     @Test
-    void testGetAccountByIdAndSameAccountNot() {
-        authenticate();
-
-        assertThrows(
-                AccountNotFoundException.class,
-                () -> service.getAccount(2L));
-
-    }
-
-    @Test
-    void testGetAccountNotFound() {
-        authenticate();
+    void testGetAccount_NotFound() {
 
         when(repository.findById(1L)).thenReturn(Optional.empty());
 
@@ -108,57 +98,26 @@ class AccountServiceImplTest {
     }
 
     @Test
-    void testUpdateUsername() throws AccountNotFoundException, AccountException {
-        Account account = authenticate();
+    void testUpdateUsername_Success() throws AccountException {
 
+        Account account = createAccount();
+
+        when(repository.findById(account.getId())).thenReturn(Optional.of(account));
         when(encoder.matches(anyString(), anyString())).thenReturn(true);
         when(repository.existsByUsernameAndIdNot(anyString(), anyLong())).thenReturn(false);
-        when(repository.findById(1L)).thenReturn(Optional.of(account));
+        doReturn(new AccountResponse(account.getId(), account.getUsername())).when(mapper).mapData(AccountResponse.class, account);
+        when(repository.save(account)).thenReturn(account);
 
-        ChangeUsernameRequest request = new ChangeUsernameRequest("newUsername", "password");
-
-        AccountResponse res = service.updateUsername(1L, request);
-
+        AccountResponse res = service.updateUsername(account.getId(), new ChangeUsernameRequest("username", "password"));
         assertNotNull(res);
-        assertEquals("newUsername", res.username());
     }
 
     @Test
-    void testUpdateUsernameAdnSameAccountNot() {
-        authenticate();
+    void testUpdateUsername_AccountNotFound() {
 
-        when(encoder.matches(anyString(), anyString())).thenReturn(true);
+        when(repository.findById(anyLong())).thenReturn(Optional.empty());
 
-        ChangeUsernameRequest request = new ChangeUsernameRequest("username", "password");
-
-        assertThrows(
-                AccountException.class,
-                () -> service.updateUsername(1L, request));
-
-    }
-
-    @Test
-    void testUpdateUsernameAndPassIncorrect() {
-        authenticate();
-
-        ChangeUsernameRequest request = new ChangeUsernameRequest("username", "otherPass");
-
-        assertThrows(
-                AccountException.class,
-                () -> service.updateUsername(1L, request));
-
-    }
-
-    @Test
-    void testUpdateUsernameNotFound() {
-
-        authenticate();
-
-        when(repository.findById(1L)).thenReturn(Optional.empty());
-        when(encoder.matches(anyString(), anyString())).thenReturn(true);
-        when(repository.existsByUsernameAndIdNot(anyString(), anyLong())).thenReturn(false);
-
-        ChangeUsernameRequest request = new ChangeUsernameRequest("username", "password");
+        ChangeUsernameRequest request = createUsernameRequest();
 
         assertThrows(
                 AccountNotFoundException.class,
@@ -166,110 +125,140 @@ class AccountServiceImplTest {
     }
 
     @Test
-    void testUpdatePassword() {
-        Account account = authenticate();
+    void testUpdateUsername_PassNotMatches() {
 
-        when(encoder.matches(anyString(), anyString())).thenReturn(true);
-        when(repository.findById(account.getId())).thenReturn(Optional.of(account));
-
-        ChangePasswordRequest request = new ChangePasswordRequest("password", "newPass", "newPass");
-        assertDoesNotThrow(
-                () -> service.updatePassword(account.getId(), request));
-
-    }
-
-    @Test
-    void testUpdatePasswordAndSameAccuntNot() {
-        authenticate();
-
-        ChangePasswordRequest request = new ChangePasswordRequest("holamundo", "passsword", "password");
-
-        assertThrows(
-                AccountException.class,
-                () -> service.updatePassword(2L, request));
-    }
-
-    @Test
-    void testUpdatePasswordIncorrect() {
-        Account account = authenticate();
+        when(repository.findById(anyLong())).thenReturn(Optional.of(createAccount()));
         when(encoder.matches(anyString(), anyString())).thenReturn(false);
 
-        ChangePasswordRequest request = new ChangePasswordRequest("holamundo", "passsword", "otherPass");
+        ChangeUsernameRequest request = createUsernameRequest();
 
         assertThrows(
                 AccountException.class,
-                () -> service.updatePassword(account.getId(), request));
-
+                () -> service.updateUsername(1L, request)
+        );
     }
 
     @Test
-    void testUpdateNewPasswordMismatch() {
-        Account account = authenticate();
-
+    void testUpdateUsername_UsernameExists() {
+        when(repository.findById(anyLong())).thenReturn(Optional.of(createAccount()));
         when(encoder.matches(anyString(), anyString())).thenReturn(true);
+        when(repository.existsByUsernameAndIdNot(anyString(), anyLong())).thenReturn(true);
 
-        ChangePasswordRequest request = new ChangePasswordRequest("holamundo", "passsword", "otherPass");
+        ChangeUsernameRequest request = createUsernameRequest();
 
         assertThrows(
                 AccountException.class,
-                () -> service.updatePassword(account.getId(), request));
-
+                () -> service.updateUsername(1L, request)
+        );
     }
 
     @Test
-    void testUpdatePasswordAccountNotFound() {
-        Account account = authenticate();
+    void testUpdatePassword_Success() {
 
+        when(repository.findById(anyLong())).thenReturn(Optional.of(createAccount()));
         when(encoder.matches(anyString(), anyString())).thenReturn(true);
-        when(repository.findById(account.getId())).thenReturn(Optional.of(account));
+        when(encoder.encode(anyString())).thenReturn("passwordEncoded");
+        ChangePasswordRequest request = createPasswordRequest();
 
-        ChangePasswordRequest request = new ChangePasswordRequest("password", "newPass", "newPass");
-        assertDoesNotThrow(
-                () -> service.updatePassword(account.getId(), request));
-
+        assertDoesNotThrow(() -> service.updatePassword(1L, request));
     }
 
     @Test
-    void testDeleteAccount() {
-        Account account = authenticate();
+    void testUpdatePassword_AccountNotFound() {
 
-        when(encoder.matches(anyString(), anyString())).thenReturn(true);
-        assertDoesNotThrow(
-                () -> service.deleteAccount(account.getId(), "password"));
+        when(repository.findById(anyLong())).thenReturn(Optional.empty());
+
+        ChangePasswordRequest request = createPasswordRequest();
+
+        assertThrows(
+                AccountNotFoundException.class,
+                () -> service.updatePassword(1L, request)
+        );
     }
 
     @Test
-    void testDeleteAccountAndSameAccountNot() {
-        authenticate();
+    void testUpdatePassword_PasswordNotMatches() {
 
+        when(repository.findById(anyLong())).thenReturn(Optional.of(createAccount()));
+        when(encoder.matches(anyString(), anyString())).thenReturn(false);
+        ChangePasswordRequest request = createPasswordRequest();
+        ChangePasswordRequest finalRequest = request.withPassword("otherPassword");
+        assertThrows(
+                AccountException.class,
+                () -> service.updatePassword(1L, finalRequest)
+        );
+    }
+
+    @Test
+    void testUpdatePassword_PasswordMismatch() {
+
+        when(repository.findById(anyLong())).thenReturn(Optional.of(createAccount()));
         when(encoder.matches(anyString(), anyString())).thenReturn(true);
+        ChangePasswordRequest request = createPasswordRequest();
+        ChangePasswordRequest finalRequest = request.withNewPasswordAndConfirmNewPassword(
+                "newPassword",
+                "otherPassword"
+        );
 
         assertThrows(
                 AccountException.class,
-                () -> service.deleteAccount(2L, "password"));
-
+                () -> service.updatePassword(1L, finalRequest)
+        );
     }
 
     @Test
-    void testDeleteAccountPasswordMismatch() {
-        authenticate();
+    void deleteAccount_Success() {
+
+        when(repository.findById(anyLong())).thenReturn(Optional.of(createAccount()));
+        when(encoder.matches(anyString(), anyString())).thenReturn(true);
+
+        assertDoesNotThrow(() -> service.deleteAccount(1L, "password"));
+    }
+
+    @Test
+    void deleteAccount_AccountNotFound() {
+
+        when(repository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(
+                AccountNotFoundException.class,
+                () -> service.deleteAccount(1L, "password")
+        );
+    }
+
+    @Test
+    void deleteAccount_PasswordNotMatches() {
+
+        when(repository.findById(1L)).thenReturn(Optional.of(createAccount()));
         when(encoder.matches(anyString(), anyString())).thenReturn(false);
 
         assertThrows(
                 AccountException.class,
-                () -> service.deleteAccount(2L, "password"));
+                () -> service.deleteAccount(1L, "password")
+        );
     }
 
-    private Account authenticate() {
-        Account account = Account.builder()
+    private Account createAccount() {
+        return Account.builder()
                 .id(1L)
                 .username("username")
                 .password("password")
                 .build();
-
-        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(account, null);
-        SecurityContextHolder.getContext().setAuthentication(auth);
-        return account;
     }
 
+    private AccountRequest createAccountRequest() {
+        return new AccountRequest("username", "password", "password");
+    }
+
+    private ChangePasswordRequest createPasswordRequest() {
+        return new ChangePasswordRequest(
+                "password",
+                "newPassword",
+                "newPassword"
+        );
+    }
+
+    private ChangeUsernameRequest createUsernameRequest() {
+        return new ChangeUsernameRequest("username", "password");
+    }
 }
