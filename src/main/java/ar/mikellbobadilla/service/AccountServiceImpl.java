@@ -44,6 +44,7 @@ public class AccountServiceImpl implements AccountService {
                 .username(request.username())
                 .password(encoder.encode(request.password()))
                 .build();
+
         Account newAccount = repository.save(account);
 
         return mapper.mapData(AccountResponse.class, newAccount);
@@ -75,11 +76,11 @@ public class AccountServiceImpl implements AccountService {
         Account account = repository.findById(accountId)
                 .orElseThrow(() -> new AccountNotFoundException("Account not found!"));
 
-        boolean passwordNotMatches = encoder.matches(request.password(), account.getPassword());
+        boolean passwordNotMatches = !encoder.matches(request.password(), account.getPassword());
 
         if (passwordNotMatches) throw new AccountException("Password incorrect!");
 
-        boolean passwordMismatch = request.newPassword().equals(request.confirmNewPassword());
+        boolean passwordMismatch = !request.newPassword().equals(request.confirmNewPassword());
 
         if (passwordMismatch) throw new AccountException("Password mismatch!");
 
@@ -93,7 +94,7 @@ public class AccountServiceImpl implements AccountService {
         Account account = repository.findById(accountId)
                 .orElseThrow(() -> new AccountNotFoundException("Account not found!"));
 
-        boolean passwordNotMatches = encoder.matches(password, account.getPassword());
+        boolean passwordNotMatches = !encoder.matches(password, account.getPassword());
 
         if (passwordNotMatches) throw new AccountException("Password incorrect!");
 
