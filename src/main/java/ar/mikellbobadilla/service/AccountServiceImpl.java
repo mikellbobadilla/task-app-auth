@@ -9,10 +9,8 @@ import ar.mikellbobadilla.exception.AccountNotFoundException;
 import ar.mikellbobadilla.model.Account;
 import ar.mikellbobadilla.repository.AccountRepository;
 import ar.mikellbobadilla.service.interfaces.AccountService;
+import ar.mikellbobadilla.utils.ObjectMapper;
 import lombok.AllArgsConstructor;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,130 +20,83 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository repository;
     private final PasswordEncoder encoder;
+    private final ObjectMapper mapper;
 
     @Override
-    public AccountResponse getAccount(Long id) throws AccountNotFoundException {
-        Account accountAuth = getAccountFromContextHolder();
-
-        boolean isSameAccount = accountAuth.getId().equals(id);
-
-        if (!isSameAccount) {
-            throw new AccountNotFoundException("Account not found!");
-        }
-
-        Account account = repository.findById(id)
+    public AccountResponse getAccount(Long accountId) throws AccountNotFoundException {
+        Account account = repository.findById(accountId)
                 .orElseThrow(() -> new AccountNotFoundException("Account not found!"));
-
-        return parseToAccontResponse(account);
+        return mapper.mapData(AccountResponse.class, account);
     }
 
     @Override
     public AccountResponse createAccount(AccountRequest request) throws AccountException {
 
-        if (repository.existsByUsername(request.username())) {
-            throw new AccountException("Account exists!");
-        }
+        boolean usernameExists = repository.existsByUsername(request.username());
 
-        if (!request.password().equals(request.secondPassword())) {
-            throw new AccountException("Password mismatch!");
-        }
+        if (usernameExists) throw new AccountException("Account exists");
+
+        boolean passwordMismatch = !request.password().equals(request.confirmPassword());
+
+        if (passwordMismatch) throw new AccountException("Password mismatch");
 
         Account account = Account.builder()
                 .username(request.username())
                 .password(encoder.encode(request.password()))
                 .build();
+        Account newAccount = repository.save(account);
 
-        return parseToAccontResponse(repository.save(account));
+        return mapper.mapData(AccountResponse.class, newAccount);
     }
 
     @Override
-    public AccountResponse updateUsername(Long id, ChangeUsernameRequest request)
-            throws AccountException, AccountNotFoundException {
+    public AccountResponse updateUsername(Long accountId, ChangeUsernameRequest request) throws AccountException {
 
-        Account accountAuth = getAccountFromContextHolder();
-
-        boolean passIsCorrect = encoder.matches(request.password(), accountAuth.getPassword());
-
-        boolean isSameAccount = accountAuth.getId().equals(id);
-
-        if (!isSameAccount) {
-            throw new AccountException("Account not found!");
-        }
-
-        if (!passIsCorrect) {
-            throw new AccountException("Password incorrect!");
-        }
-
-        if (repository.existsByUsernameAndIdNot(request.username(), id)) {
-            throw new AccountException("Username exists!");
-        }
-
-        Account account = repository.findById(id)
+        Account account = repository.findById(accountId)
                 .orElseThrow(() -> new AccountNotFoundException("Account not found!"));
+
+        boolean passwordNotMatches = !encoder.matches(request.password(), account.getPassword());
+
+        if (passwordNotMatches) throw new AccountException("Password mismatch");
+
+        boolean usernameExists = repository.existsByUsernameAndIdNot(request.username(), account.getId());
+
+        if (usernameExists) throw new AccountException("Username exists");
 
         account.setUsername(request.username());
-        repository.save(account);
-        return parseToAccontResponse(account);
 
+        Account newAccount = repository.save(account);
+
+        return mapper.mapData(AccountResponse.class, newAccount);
     }
 
     @Override
-    public void updatePassword(Long id, ChangePasswordRequest request)
-            throws AccountException, AccountNotFoundException {
-
-        Account accountAuth = getAccountFromContextHolder();
-
-        boolean isSameAccount = accountAuth.getId().equals(id);
-        boolean passIsCorrect = encoder.matches(request.password(),
-                accountAuth.getPassword());
-        boolean isNewPassMatch = request.newPassword().equals(request.confirmNewPassword());
-
-        if (!isSameAccount) {
-            throw new AccountException("Account not found!");
-        }
-
-        if (!passIsCorrect) {
-            throw new AccountException("Password incorrect!");
-        }
-
-        if (!isNewPassMatch) {
-            throw new AccountException("Password mismatch!");
-        }
-
-        Account account = repository.findById(id)
+    public void updatePassword(Long accountId, ChangePasswordRequest request) throws AccountException {
+        Account account = repository.findById(accountId)
                 .orElseThrow(() -> new AccountNotFoundException("Account not found!"));
 
+        boolean passwordNotMatches = encoder.matches(request.password(), account.getPassword());
+
+        if (passwordNotMatches) throw new AccountException("Password incorrect!");
+
+        boolean passwordMismatch = request.newPassword().equals(request.confirmNewPassword());
+
+        if (passwordMismatch) throw new AccountException("Password mismatch!");
+
         account.setPassword(encoder.encode(request.newPassword()));
+
         repository.save(account);
     }
 
     @Override
-    public void deleteAccount(Long id, String password) throws AccountException {
-        Account accountAuth = getAccountFromContextHolder();
+    public void deleteAccount(Long accountId, String password) throws AccountException {
+        Account account = repository.findById(accountId)
+                .orElseThrow(() -> new AccountNotFoundException("Account not found!"));
 
-        boolean isSameAccount = accountAuth.getId().equals(id);
+        boolean passwordNotMatches = encoder.matches(password, account.getPassword());
 
-        boolean passIsCorrect = encoder.matches(password, accountAuth.getPassword());
+        if (passwordNotMatches) throw new AccountException("Password incorrect!");
 
-        if (!isSameAccount) {
-            throw new AccountException("Account not found!");
-        }
-
-        if (!passIsCorrect) {
-            throw new AccountException("Password incorrect!");
-        }
-
-        repository.deleteById(id);
+        repository.deleteById(accountId);
     }
-
-    private Account getAccountFromContextHolder() {
-        Authentication aut = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext()
-                .getAuthentication();
-        return (Account) aut.getPrincipal();
-    }
-
-    private AccountResponse parseToAccontResponse(Account account) {
-        return new AccountResponse(account.getId(), account.getUsername());
-    }
-
 }
