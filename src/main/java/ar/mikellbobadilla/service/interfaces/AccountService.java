@@ -9,13 +9,13 @@ import ar.mikellbobadilla.exception.AccountNotFoundException;
 
 public interface AccountService {
 
-    public AccountResponse getAccount(Long id) throws AccountNotFoundException;
+    AccountResponse getAccount(Long accountId) throws AccountNotFoundException;
 
-    public AccountResponse createAccount(AccountRequest request) throws AccountException;
+    AccountResponse createAccount(AccountRequest request) throws AccountException;
 
-    public AccountResponse updateUsername(Long id, ChangeUsernameRequest request) throws AccountException, AccountNotFoundException;
+    AccountResponse updateUsername(Long accountId, ChangeUsernameRequest request) throws AccountException;
 
-    public void updatePassword(Long id, ChangePasswordRequest request) throws AccountException, AccountNotFoundException;
+    void updatePassword(Long accountId, ChangePasswordRequest request) throws AccountException;
 
-    public void deleteAccount(Long id, String password) throws AccountException;
+    void deleteAccount(Long accountId, String password) throws AccountException;
 }
