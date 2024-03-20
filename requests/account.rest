@@ -1,0 +1,29 @@
+### Create Account
+POST http://localhost:8080/api/accounts HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "username",
+    "password": "Holamundo100",
+    "secondPassword": "Holamundo100"
+}
+
+### Update Username
+PATCH http://localhost:8080/api/accounts/1/username HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InVzZXJuYW1lIiwiZXhwIjoxNzEwOTc0Nzg1fQ.DeXzML2lt1q9zWSPyLMrSVQxnpwqIx1UGj2b2Q8i0lM
+
+{
+    "username": "user",
+    "password": "Holamundo100"
+}
+
+
+### Authenticate with Account
+POST http://localhost:8080/api/auth HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "username",
+    "password": "Holamundo100"
+}
