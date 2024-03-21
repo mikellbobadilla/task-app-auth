@@ -1,9 +1,12 @@
-{
-  "properties": [
-    {
-      "name": "jwt.secret",
-      "type": "java.lang.String",
-      "description": "The secret key used to sign the JWT token"
-    }
-  ]
-}
+{"properties": [
+  {
+    "name": "jwt.secret",
+    "type": "java.lang.String",
+    "description": "The secret key used to sign the JWT token"
+  },
+  {
+    "name": "allowed.origin",
+    "type": "java.lang.String",
+    "description": "A description for 'allowed.origin'"
+  }
+]}
