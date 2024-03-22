@@ -20,7 +20,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-@AllArgsConstructor
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -29,6 +28,11 @@ public class SecurityConfig {
     private final JwtFilter jwtFilter;
     @Value("${allowed.origin}")
     private String origin;
+
+    public SecurityConfig(AuthenticationProvider provider, JwtFilter jwtFilter) {
+        this.provider = provider;
+        this.jwtFilter = jwtFilter;
+    }
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
